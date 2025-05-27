@@ -46,7 +46,7 @@ def predict():
 
         input_data = [[bathrooms, bedrooms, sqft_living, sqft_lot, floors, view, grade, sqft_above, sqft_basement, yr_built, lat, long, sqft_living15, sqft_lot15, Average, Fair, Good, VeryGood, Poor]]
         prediction = model.predict(input_data)
-        precio_real = np.exp(prediction)
+        precio_real = 10 ** prediction
 
         return jsonify({'El precio de tu vivienda es de': float(precio_real[0])})
     
