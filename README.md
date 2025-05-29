@@ -20,7 +20,7 @@ Por último, la variable categórica `condition` que registra el estado de la pr
 
 Para tratar de dar la mejor predicción posible teniendo en cuenta las limitaciones del servidor, se han estudiado diferentes modelos para tratar de dar con las condiciones óptimas.
 
-En todos los modelos se emplearon todas las variables del conjunto de datos tras la limpieza.
+En todos los modelos se comenzó empleando todas las variables del conjunto de datos tras la limpieza.
 
 #### Modelo base - linear_model (baseline):
 
@@ -34,6 +34,8 @@ Se intentó aplicar un modelo XGBoost para mejorar el rendimiento, pero fue desc
 Dado el inconveniente anterior, se optó por utilizar un modelo de Random Forest que está incluido en la librería de `Scikit-Learn`, el cual fue seleccionado como modelo final del proyecto.
 
 En el estudio del rendimiento del modelo, obtuvimos un error MAE de 78725.08, que representa un error de predicción del 15%.
+
+Testeando el rendimiento del modelo y la importancia de las variables, se acabó descartando el one-hot-encoding de la varialbe `coindition` ya que el resultado de modificar esta variable no representaba ninguna variación apreciable en la predicción del precio de la vivienda. 
 
 ### Desarrollo web
 
