@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Predicción de Vivienda</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            height: 100vh;
+            background-image: url('https://www.clarin.com/img/2017/02/19/ryjGpfPKx_1256x620.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .contenedor {
+            display: flex;
+            flex-direction: row;
+            gap: 40px;
+            align-items: flex-start;
+            background-color: rgba(255, 255, 255, 0.9); /* cuadro blanco translúcido */
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        form {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        #map-container {
+            margin-top: 30px; /* mueve el mapa hacia abajo */
+            width: 400px;
+            height: 300px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 8px 16px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="contenedor">
+        <div class="form-box">
+            <h1>Introduce los datos de la vivienda</h1>
+            <form id="formulario">
+                <label> Número de baños </label><br>
+                <input type="number" name="bathrooms" placeholder="Baños" required><br><br>
+                <label> Número de habitaciones </label><br>
+                <input type="number" name="bedrooms" placeholder="Habitaciones" required><br><br>
+                <label> Superficie habitable (en pies cuadrados) </label><br>
+                <input type="number" name="sqft_living" placeholder="Superficie habitable" required><br><br>
+                <label> Tamaño de la parcela (en pies cuadrados) </label><br>
+                <input type="number" name="sqft_lot" placeholder="Tamaño del lote" required><br><br>
+                <label> Número de pisos </label><br>
+                <input type="number" name="floors" placeholder="Pisos" required><br><br>
+                <label>Calidad de la vista: <span id="viewValue">2</span></label><br>
+                <input type="range" name="view" min="0" max="4" value="2" id="viewSlider" required><br><br>
+                <label>Grado de construcción y diseño: <span id="gradeValue">7</span></label><br>
+                <input type="range" name="grade" min="1" max="13" value="7" id="gradeSlider" required><br><br>
+                <label> Superficie sobre tierra </label><br>
+                <input type="number" name="sqft_above" placeholder="Superficie sobre tierra" required><br><br>
+                <label> Superficie del sótano </label><br>
+                <input type="number" name="sqft_basement" placeholder="Superficie sótano" required><br><br>
+                <label> Año de construcción </label><br>
+                <input type="number" name="yr_built" placeholder="Año construcción" required><br><br>
+                <!--<label> Superficie habitable media de las 15 propiedades más cercanas </label><br>-->
+                <!--<input type="number" name="sqft_living15" placeholder="Superficie habitable 15" required><br><br>-->
+                <!--<label> Tamaño de parcela media de las 15 propiedades más cercanas </label><br>-->
+                <!--<input type="number" name="sqft_lot15" placeholder="Tamaño del lote 15" required><br><br>-->
+
+
+                <!-- Mapa interactivo en lugar de inputs de lat y long -->
+                <input type="hidden" id="latitude" name="lat" required>
+                <input type="hidden" id="longitude" name="long" required>
+
+                <button type="submit">Predecir</button>
+                <div id="prediction-result" style="margin-top: 20px; font-weight: bold; font-size: 1.2em;"></div>
+
+                <!--<button type="submit">Predecir</button>-->
+                <!--<div id="prediction-result" style="margin-top: 20px; font-weight: bold; font-size: 1.2em;"></div>-->
+                <!--<div id="predictionliv-result" style="margin-top: 20px; font-weight: bold; font-size: 1.2em;"></div>-->
+                <!--<div id="predictionlot-result" style="margin-top: 20px; font-weight: bold; font-size: 1.2em;"></div>-->
+            </form>
+        </div>
+        <div id="map-container">
+            <div id="map"></div>
+
+            <div id="predictionliv-result" style="margin-top: 15px; font-weight: bold; font-size: 1em; text-align: center;"></div>
+            <div id="predictionlot-result" style="margin-top: 10px; font-weight: bold; font-size: 1em; text-align: center;"></div>
+            <div id="output-sqft15" style="margin-top: 10px; background: #fff; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center;">
+        <!-- Aquí aparecerán los valores de sqft_living15 y sqft_lot15 -->
+            </div>
+        </div>
+
+    <!--    <div id="map-container">-->
+    <!--        <div id="map"></div>-->
+    <!--    </div>-->
+    <!--    <div id="output-sqft15" style="margin-top: 15px; background: #fff; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center;">-->
+    <!-- Aquí aparecerán los valores de sqft_living15 y sqft_lot15 -->
+    <!--    </div>-->
+    <!--</div>-->
+
+    <p id="respuesta"></p>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        // Inicializa el mapa centrado en Seattle
+        var map = L.map('map').setView([47.6062, -122.3321], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker;
+
+        map.on('click', function(e) {
+            var lat = e.latlng.lat.toFixed(6);
+            var lng = e.latlng.lng.toFixed(6);
+
+            console.log("Latitud:", lat, "Longitud:", lng);
+
+            if (marker) {
+                marker.setLatLng(e.latlng);
+            } else {
+                marker = L.marker(e.latlng).addTo(map);
+            }
+
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = lng;
+        });
+    </script>
+
+    <script>
+        // Mostrar el valor de "Calidad de la vista"
+        const viewSlider = document.getElementById("viewSlider");
+        const viewValue = document.getElementById("viewValue");
+        viewSlider.addEventListener("input", () => {
+            viewValue.textContent = viewSlider.value;
+        });
+
+        // Mostrar el valor de "Grado de construcción y diseño"
+        const gradeSlider = document.getElementById("gradeSlider");
+        const gradeValue = document.getElementById("gradeValue");
+        gradeSlider.addEventListener("input", () => {
+            gradeValue.textContent = gradeSlider.value;
+        });
+    </script>
+
+    <script>
+        const form = document.getElementById("formulario");
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const lat = document.getElementById("latitude").value;
+            const lng = document.getElementById("longitude").value;
+
+            if (!lat || !lng) {
+                alert("Por favor, selecciona una ubicación en el mapa.");
+                return;
+            }
+
+            const formData = new FormData(form);
+
+            const condition = formData.get("condition");
+            const options = ["Average", "Fair", "Good", "VeryGood", "Poor"];
+            options.forEach(opt => {
+                formData.append(opt, condition === opt ? 1 : 0);
+            });
+            try {
+                const response = await fetch("/predict", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await response.json();
+                console.log(":marca_de_verificación_blanca: JSON recibido:", data);
+                document.getElementById("prediction-result").innerText = data.resultado || data.Error;
+                document.getElementById("predictionliv-result").innerText = data.superficie15 || "";
+                document.getElementById("predictionlot-result").innerText = data.lote15 || "";
+                const sqftLiv15 = formData.get("sqft_living15");
+                const sqftLot15 = formData.get("sqft_lot15");
+                document.getElementById("output-sqft15").innerHTML = `
+                     <div>Superficie habitable 15: ${sqftLiv15} pies²</div>
+                     <div>Tamaño del lote 15: ${sqftLot15} pies²</div>`;
+            } catch (error) {
+                const texto = await response.text();
+                console.log(":advertencia: Respuesta no JSON:", texto);
+                document.getElementById("respuesta").innerText = ":advertencia: El servidor no devolvió JSON válido.";
+            }
+        });
+    </script>
+</body>
+
+</html>
