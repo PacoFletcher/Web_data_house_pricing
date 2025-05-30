@@ -39,3 +39,13 @@ Testeando el rendimiento del modelo y la importancia de las variables, se acabó
 
 ### Desarrollo web
 
+El proyecto consiste en una web que predice el precio de una vivienda en función de sus características. Para ello, se ha desarrollado una interfaz amigable combinando HTML, CSS, JavaScrip y leadlet.`Formulario interactivo`
+Los usuarios pueden introducir datos relevantes de una vivienda como número de habitaciones, baños, superficie habitable, tamaño de la parcela, etc.`Sliders`
+Para características como "Calidad de la vista" y "Grado de construcción", se han implementado controles tipo range con visualización en tiempo real del valor.`Mapa interactivo de Seattle con Leaflet`
+Se ha incorporado un mapa donde el usuario puede hacer clic para seleccionar la ubicación de la vivienda. Las coordenadas (latitud y longitud) se guardan automáticamente en campos ocultos del formulario.`Diseño visual con CSS`
+El sitio tiene un fondo visual atractivo con una fotografía de Seattle y un contenedor translúcido con estilo moderno y limpio, incluyendo bordes redondeados, sombras y espaciado para mejorar la experiencia de usuario.`Visualización del resultado`
+Al enviar el formulario, se muestra el precio estimado de la vivienda en base a los datos introducidos por el usuario.### Cómo funciona la web
+1. El usuario rellena un formulario con datos de la vivienda.
+2. Selecciona una ubicación en el mapa (latitud y longitud que se asignan automáticamente).
+3. Se envía una solicitud al servidor (/predict) con todos los datos.
+4. El servidor devuelve: el precio estimado. Los valores calculados para sqft_living15 y sqft_lot15, basados en propiedades cercanas.
