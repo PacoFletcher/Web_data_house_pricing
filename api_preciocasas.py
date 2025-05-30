@@ -74,7 +74,7 @@ def retrain():
     if os.path.exists("data/house_prices_retrain.csv"):
         data = pd.read_csv('data/house_prices_retrain.csv')
 
-        X_train, X_test, y_train, y_test = train_test_split(data.drop(columns=['Unnamed: 0','log_price','price','waterfront']),
+        X_train, X_test, y_train, y_test = train_test_split(data.drop(columns=['Unnamed: 0','log_price','price']),
                                                         data['log_price'],
                                                         test_size = 0.20,
                                                         random_state=42)
