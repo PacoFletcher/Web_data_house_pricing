@@ -74,7 +74,7 @@ def retrain():
     if os.path.exists("data/house_prices_retrain.csv"):
         data = pd.read_csv('data/house_prices_retrain.csv')
 
-        X_train, X_test, y_train, y_test = train_test_split(data.drop(columns=['log_price','price','waterfront']),
+        X_train, X_test, y_train, y_test = train_test_split(data.drop(columns=['Unnamed: 0','log_price','price','waterfront']),
                                                         data['log_price'],
                                                         test_size = 0.20,
                                                         random_state=42)
@@ -83,8 +83,8 @@ def retrain():
         model.fit(X_train, y_train)
         rmse = np.sqrt(mean_squared_error(y_test, model.predict(X_test)))
         mape = mean_absolute_percentage_error(y_test, model.predict(X_test))
-        model.fit(data.drop(columns=['log_price']), data['log_price'])
-        pickle.dump(model, open('randforest_model.pkl', 'wb'))
+        model.fit(data.drop(columns=['log_price']), data['log_price'])  
+        pickle.dump(model, open('randforest_model_def.pkl', 'wb'))
 
         return f"Model retrained. New evaluation metric RMSE: {str(rmse)}, MAPE: {str(mape)}"
     else:
