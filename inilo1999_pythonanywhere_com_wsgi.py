@@ -104,7 +104,7 @@ import sys
 ## "git clone git@github.com/myusername/myproject.git"
 ## ...or uploaded files to the directory "myproject", then you should
 ## specify "/home/Inilo1999/myproject"
-path = '/home/Inilo1999/Web_data_house_pricing/'
+path = '/home/Inilo1999/Web_data_house_pricing/' 
 if path not in sys.path:
     sys.path.append(path)
 #
